@@ -14,8 +14,9 @@ class Api():
         for post in profile_posts['data']:
             value = post['message'] if 'message' in post else None 
             if value is not None:
-                data.append(post['message'])
+                #print(post['message'])
+                data.append(value)
 
-        result = {"message" : msg, "data" : data.reverse()}
+        result = {"message" : msg, "data" : data}
         
         return result 

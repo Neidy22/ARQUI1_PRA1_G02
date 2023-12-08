@@ -67,12 +67,13 @@ def showMain():
     def get_console_log():
         consola_out.delete('1.0', END)
         response = Api.posts_from_fb(TKN_ACCESS)
-        console_log = serial_conn.check_for_new_orders(response['data'],2)
+        #console_log = serial_conn.check_for_new_orders(response['data'],2)
+        console_log = response
         consola_out.insert('end', console_log)
 
     def close_app():
         serial_conn.close_connection()
-        v.destroy
+        v.destroy()
 
     b = ttk.Button(v, text="Respuesta", command=get_console_log)
     b.place(x=700, y=175)
