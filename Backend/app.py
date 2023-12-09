@@ -4,8 +4,11 @@ from api import Api
 from connection import Connection
 
 console_log = ''
+last_id = ''
 TKN_ACCESS= ''
 serial_conn = Connection()
+registered_orders = dict() # this will contain the id's of the procesed orders to detect when the user post a new order
+
 
 class App():
 
@@ -37,10 +40,11 @@ class App():
             COM = self.com.get()
             
             if TKN_ACCESS != '' and COM != '':
-                if serial_conn.new_connection(COM, 9600):
+                try:
+                    serial_conn.new_connection(COM, 9600)
                     self.root.destroy()
                     showMain()
-                else:
+                except TimeoutError:
                     self.response_label.config(text="ERROR! No se pudo conectar al bluetooth")
             else:
                 self.response_label.config(text="ERROR! Debes introducir un token de acceso y un puerto COM")
@@ -64,12 +68,45 @@ def showMain():
     t = ttk.Label(v, text="STATUS", background='gray')
     t.place(x=50, y=185)
 
+    def check_for_new_orders(input_orders):
+        for key, value in input_orders.items():
+            new_order = registered_orders.get(key)
+
+            if new_order is None:
+                
+                output = serial_conn.send_new_order(value)
+                if output != "Error":
+                    output_list = output.split(';')
+                    machine_state = output_list[0].split('-')
+
+                    console_log = f'''============================================================================================================================= \n
+                                    Estado de la máquina  : {machine_state[0]} , Producto Procesado: {machine_state[1]} , Productos encolados : {output_list[9]}\n
+                                    ============================================================================================================================= \n
+                                    Existencia Producto 1 : {output_list[1]} , Monto Vendido Producto 1 : Q.{output_list[2]} \n
+                                    Existencia Producto 2 : {output_list[3]} , Monto Vendido Producto 2 : Q.{output_list[4]} \n 
+                                    Existencia Producto 3 : {output_list[5]} , Monto Vendido Producto 3 : Q.{output_list[6]} \n 
+                                    Existencia Total      : {output_list[7]} , Monto Vendido Total      : Q.{output_list[8]} \n
+                                    '''
+                else:
+                    console_log = output
+                
+                consola_out.insert('end', console_log)
+                registered_orders[key] = value
+                println(f'Nueva orden procesada {registered_orders[key]}')
+            else:
+                consola_out.insert('end', "Buscando nueva orden")
+             
+    
+
     def get_console_log():
         consola_out.delete('1.0', END)
         response = Api.posts_from_fb(TKN_ACCESS)
-        #console_log = serial_conn.check_for_new_orders(response['data'],2)
-        console_log = response
-        consola_out.insert('end', console_log)
+
+        if response['message'] is None:
+            check_for_new_orders(response['data'])
+        else :
+            console_log = response['message']
+            consola_out.insert('end', console_log)
 
     def close_app():
         serial_conn.close_connection()
@@ -87,6 +124,9 @@ def showMain():
     consola_out.place(x=50, y=205)
     consola_out.insert('end', console_log)
     v.mainloop()
+
+
+
 
 
 App()

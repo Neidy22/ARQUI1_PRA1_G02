@@ -14,7 +14,8 @@ class Connection():
     def new_connection(self, com_port, baud_rate):
         response = False
         try:
-            self.conn = serial.Serial(com_port,baud_rate)
+            self.conn = serial.Serial(com_port,baud_rate, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE)
+            
             if not self.conn.isOpen():
                 self.conn.open()
             response = True
@@ -32,19 +33,7 @@ class Connection():
             msg = "ERROR! No se pudo cerrar la conexión"
         return msg
 
-    def check_for_new_orders(self, data, oldData):
-        msg = "No hay nuevas órdenes"
-        if (len(data) > oldData):
-            for i in range(len(data) - 1, oldData):
-                msg = self.send_new_order(data[i])
-                if msg.lower() == ERROR_MESSAGE:
-                    break
-
-                while True:
-                    # here are the arduino response types
-                    print(msg)
-                    break  
-        return msg   
+    
 
     def send_new_order(self, id):
         msg = None
@@ -59,7 +48,7 @@ class Connection():
             else :
                 # invalid product id
                 self.conn.write(b'0') 
-                
+
             # wait for the arduino response for my request
             while True:
                 msg = self.conn.readline()
@@ -70,5 +59,7 @@ class Connection():
             msg = "Error"
         
         return msg 
+
+
 
 
