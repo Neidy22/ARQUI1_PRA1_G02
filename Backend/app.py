@@ -15,24 +15,32 @@ class App():
     def __init__(self):
         self.console_log = ''
         self.root = Tk()
-        self.root.title("Iniciar")
+        self.root.title("Creacion de Conexion")
         self.root.geometry('850x400')
         self.root.resizable(False, False)
+        self.root['bg'] = '#504c5f'
+        font_times_new_roman = ("Times New Roman", 12)
         
-        self.tkn_label = ttk.Label(self.root, text='Token')
+        self.tkn_label = ttk.Label(self.root, text='Token',background="#504c5f")
         self.tkn_label.place(x=10, y=50, width=50)
 
-        self.tkn = Entry(self.root)
+        self.tkn = Entry(self.root
+                         ,border=2
+                         ,font=font_times_new_roman)
+        
         self.tkn.place(x=100, y=50, width=600)
 
-        self.com_label = ttk.Label(self.root, text='Puerto')
+        self.com_label = ttk.Label(self.root, text='Puerto',background="#504c5f")
         self.com_label.place(x=10, y=100, width=50)
 
-        self.com = Entry(self.root)
+        self.com = Entry(self.root
+                         ,border=2
+                         ,font=font_times_new_roman)
+        
         self.com.place(x=100, y=100, width=600)
 
-        self.response_label = ttk.Label(self.root, text='')
-        self.response_label.place(x=100, y=200, width=600)
+        self.response_label = ttk.Label(self.root, text='',background="#504c5f")
+        self.response_label.place(x=200, y=300, width=600)
 
         def get_connection():
             global TKN_ACCESS
@@ -40,6 +48,7 @@ class App():
             COM = self.com.get()
             
             if TKN_ACCESS != '' and COM != '':
+                          
                 try:
                     serial_conn.new_connection(COM, 9600)
                     self.root.destroy()
@@ -47,25 +56,27 @@ class App():
                 except TimeoutError:
                     self.response_label.config(text="ERROR! No se pudo conectar al bluetooth")
             else:
-                self.response_label.config(text="ERROR! Debes introducir un token de acceso y un puerto COM")
+                self.response_label.config(text="ERROR! Debes introducir un token de acceso y un puerto COM",background="#504c5f")
             
 
         self.btn = ttk.Button(self.root, text='Connect',
                               command=get_connection)
         self.btn.pack()
+        self.btn.place(x=310, y=200, width=200)
         self.response_label.pack()
+        self.response_label.place(x=250, y=250, width=400)
         self.root.mainloop()
         
 
 def showMain():  
     v = Tk()
-    v.title("Página de Inicio")
+    v.title("Recepcion de Pedidos")
     v.geometry('850x700')
     v.resizable(False, False)
     
 
-    v['bg'] = 'gray'
-    t = ttk.Label(v, text="STATUS", background='gray')
+    v['bg'] = '#504c5f'
+    t = ttk.Label(v, text="STATUS", background='#504c5f', border=1)
     t.place(x=50, y=185)
 
     def check_for_new_orders(input_orders):
@@ -92,7 +103,7 @@ def showMain():
                 
                 consola_out.insert('end', console_log)
                 registered_orders[key] = value
-                println(f'Nueva orden procesada {registered_orders[key]}')
+                print(f'Nueva orden procesada {registered_orders[key]}')
             else:
                 consola_out.insert('end', "Buscando nueva orden")
              
@@ -113,14 +124,14 @@ def showMain():
         v.destroy()
 
     b = ttk.Button(v, text="Respuesta", command=get_console_log)
-    b.place(x=700, y=175)
+    b.place(x=700, y=385)
 
     bCerrarS = ttk.Button(v, text="Cerrar",
                           command=close_app, width=12)
     bCerrarS.place(x=375, y=650)
 
     # console log
-    consola_out = Text(v, height=10, width=90)
+    consola_out = Text(v, height=10, width=90,border=3)
     consola_out.place(x=50, y=205)
     consola_out.insert('end', console_log)
     v.mainloop()
