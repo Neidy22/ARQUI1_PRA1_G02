@@ -2,9 +2,9 @@ import serial
 
 ERROR_MESSAGE = "error"
 DONE_MESSAGE = "done"
-PROD_1 = "galleta 1"
-PROD_2 = "galleta 2"
-PROD_3 = "galleta 3"
+PROD_1 = "galleta1"
+PROD_2 = "galleta2"
+PROD_3 = "galleta3"
 
 class Connection():
 
@@ -40,6 +40,7 @@ class Connection():
         try:
             # send the new order id to the arduino
             if id.lower() == PROD_1 :
+                print("entro a prod1")
                 self.conn.write(b'1')
             elif id.lower() == PROD_2 :
                 self.conn.write(b'2')
@@ -50,10 +51,15 @@ class Connection():
                 self.conn.write(b'0') 
 
             # wait for the arduino response for my request
+            
+            
+            
             while True:
-                msg = self.conn.readline()
-                if msg != None:
+                msg = self.conn.read().decode("ASCII")
+                if msg == "0":
+                    print("llego un cero")
                     break
+            print(type(msg))
 
         except TimeoutError:
             msg = "Error"

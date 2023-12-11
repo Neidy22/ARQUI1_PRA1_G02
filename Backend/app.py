@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk
 from api import Api
 from connection import Connection
+from queue import Queue
+cola = []
 
 console_log = ''
 last_id = ''
@@ -14,6 +16,7 @@ class App():
 
     def __init__(self):
         self.console_log = ''
+        
         self.root = Tk()
         self.root.title("Creacion de Conexion")
         self.root.geometry('850x400')
@@ -73,34 +76,69 @@ def showMain():
     v.title("Recepcion de Pedidos")
     v.geometry('850x700')
     v.resizable(False, False)
-    
 
     v['bg'] = '#504c5f'
     t = ttk.Label(v, text="STATUS", background='#504c5f', border=1)
     t.place(x=50, y=185)
 
     def check_for_new_orders(input_orders):
+        cantProd1 = 3
+        cantProd2 = 3
+        cantProd3 = 3
+        available = True
+
+        Price_1 = 1.50
+        Total1 = 0
+        Price_2 = 2.50
+        Total2 = 0
+        Price_3 = 3.50
+        Total3 = 0
+
+
         for key, value in input_orders.items():
-            new_order = registered_orders.get(key)
+            cola.append(value.lower())
+        for key, value in input_orders.items():
+            #new_order = registered_orders.get(key)
+            cont = True
 
-            if new_order is None:
+            if available == True:
+                available = False
+                item = cola.pop()
                 
-                output = serial_conn.send_new_order(value)
-                if output != "Error":
-                    output_list = output.split(';')
-                    machine_state = output_list[0].split('-')
+                """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+                if item == "galleta1" and cantProd1 >0:
+                    Total1 = Total1 + Price_1
+                    cantProd1 -= 1
+                elif item == "galleta2" and cantProd2 >0:
+                    Total2 = Total2 + Price_2
+                    cantProd2 -= 1
+                elif item == "galleta3" and cantProd3 >0:
+                    Total3 = Total3 + Price_3
+                    cantProd3 -= 1
+                else:
+                    cont = False
 
-                    console_log = f'''============================================================================================================================= \n
-                                    Estado de la máquina  : {machine_state[0]} , Producto Procesado: {machine_state[1]} , Productos encolados : {output_list[9]}\n
-                                    ============================================================================================================================= \n
-                                    Existencia Producto 1 : {output_list[1]} , Monto Vendido Producto 1 : Q.{output_list[2]} \n
-                                    Existencia Producto 2 : {output_list[3]} , Monto Vendido Producto 2 : Q.{output_list[4]} \n 
-                                    Existencia Producto 3 : {output_list[5]} , Monto Vendido Producto 3 : Q.{output_list[6]} \n 
-                                    Existencia Total      : {output_list[7]} , Monto Vendido Total      : Q.{output_list[8]} \n
-                                    '''
+                """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+                
+                if cont:
+                    output = serial_conn.send_new_order(value)
+                else:
+                    output = "Error, " + item + " No disponible, por favor seleccione otro o espera a que recarguemos la maquina."
+
+
+                if output == "0":
+                    available = True
+                    console_log = f'''=============================================================\n
+                    Existencia Producto 1: {cantProd1}, Monto Vendido Producto 1:Q.{Total1}\n
+                    Existencia Producto 2: {cantProd2}, Monto Vendido Producto 2:Q.{Total2}\n 
+                    Existencia Producto 3: {cantProd3}, Monto Vendido Producto 3:Q.{Total3}\n 
+                    Monto Vendido Total : Q.{Total1 + Total2 + Total3} \n
+                    '''
                 else:
                     console_log = output
-                
+                    available = True
+                    
+                consola_out.delete('1.0', END)
                 consola_out.insert('end', console_log)
                 registered_orders[key] = value
                 print(f'Nueva orden procesada {registered_orders[key]}')
@@ -114,6 +152,8 @@ def showMain():
         response = Api.posts_from_fb(TKN_ACCESS)
 
         if response['message'] is None:
+            """for i in response:
+                cola.append(i['data'])"""
             check_for_new_orders(response['data'])
         else :
             console_log = response['message']
@@ -136,9 +176,4 @@ def showMain():
     consola_out.insert('end', console_log)
     v.mainloop()
 
-
-
-
-
 App()
-
