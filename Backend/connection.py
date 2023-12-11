@@ -14,7 +14,7 @@ class Connection():
     def new_connection(self, com_port, baud_rate):
         response = False
         try:
-            self.conn = serial.Serial(com_port,baud_rate, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE)
+            self.conn = serial.Serial(com_port,baud_rate, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, timeout = 1)
             
             if not self.conn.isOpen():
                 self.conn.open()
